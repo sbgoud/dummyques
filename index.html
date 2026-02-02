@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MCQ JSON Generator</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    padding: 20px;
+  }
+  h1 {
+    margin-bottom: 12px;
+  }
+  input, button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+  }
+  button {
+    cursor: pointer;
+    background: #2563eb;
+    color: white;
+    margin-left: 10px;
+  }
+  button:hover {
+    background: #1d4ed8;
+  }
+  .output-container {
+    position: relative;
+    margin-top: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 450px;
+    background: #020617;
+    color: #e5e7eb;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #16a34a;
+  }
+  .copy-btn:hover {
+    background: #15803d;
+  }
+</style>
+</head>
+<body>
+
+<h1>MCQ JSON Generator (125 Subjects)</h1>
+
+<input type="number" id="count" placeholder="Number of questions" min="1">
+<button onclick="generate()">Generate</button>
+
+<div class="output-container">
+  <button class="copy-btn" onclick="copyJSON()">📋 Copy</button>
+  <textarea id="output" readonly></textarea>
+</div>
+
+<script>
+const subjects = [
+  {id:8,name:"upsc_Ancient_Indian_History"},
+  {id:9,name:"upsc_Medieval_Indian_History"},
+  {id:10,name:"upsc_Modern_Indian_History"},
+  {id:11,name:"upsc_Indian_Art_and_Culture"},
+  {id:12,name:"upsc_Indian_Geography"},
+  {id:13,name:"upsc_World_Geography"},
+  {id:14,name:"upsc_Physical_Geography"},
+  {id:15,name:"upsc_Human_and_Economic_Geography"},
+  {id:16,name:"upsc_Indian_Polity_and_Constitution"},
+  {id:17,name:"upsc_Governance_and_Public_Policy"},
+  {id:18,name:"upsc_Indian_Economy"},
+  {id:19,name:"upsc_Social_Development_and_Demographics"},
+  {id:20,name:"upsc_Environment_and_Ecology"},
+  {id:21,name:"upsc_Biodiversity_and_Climate_Change"},
+  {id:22,name:"upsc_General_Science_Physics"},
+  {id:23,name:"upsc_General_Science_Chemistry"},
+  {id:24,name:"upsc_General_Science_Biology"},
+  {id:25,name:"upsc_Science_and_Technology"},
+  {id:26,name:"upsc_Current_Events_National"},
+  {id:27,name:"upsc_Current_Events_International"},
+  {id:121,name:"upscp2_Reading_Comprehension"},
+  {id:122,name:"upscp2_Interpersonal_Skills_and_Communication"},
+  {id:123,name:"upscp2_Logical_Reasoning"},
+  {id:124,name:"upscp2_Analytical_Ability"},
+  {id:125,name:"upscp2_Decision_Making_and_Problem_Solving"},
+  {id:126,name:"upscp2_General_Mental_Ability"},
+  {id:127,name:"upscp2_Basic_Numeracy"},
+  {id:128,name:"upscp2_Data_Interpretation"},
+  {id:129,name:"tgpsc_g1_pre_Current_Affairs_Regional_National_International"},
+  {id:130,name:"tgpsc_g1_pre_International_Relations_and_Events"},
+  {id:131,name:"tgpsc_g1_pre_General_Science_and_Tech_Achievements"},
+  {id:132,name:"tgpsc_g1_pre_Environmental_Issues_and_Disaster_Management"},
+  {id:133,name:"tgpsc_g1_pre_Economic_and_Social_Development_of_India"},
+  {id:134,name:"tgpsc_g1_pre_World_Geography"},
+  {id:135,name:"tgpsc_g1_pre_Indian_Geography"},
+  {id:136,name:"tgpsc_g1_pre_Telangana_Geography"},
+  {id:137,name:"tgpsc_g1_pre_History_and_Cultural_Heritage_of_India"},
+  {id:138,name:"tgpsc_g1_pre_Indian_Constitution_and_Polity"},
+  {id:139,name:"tgpsc_g1_pre_Governance_and_Public_Policy_in_India"},
+  {id:140,name:"tgpsc_g1_pre_Policies_of_Telangana_State"},
+  {id:141,name:"tgpsc_g1_pre_Telangana_Society_Culture_Heritage_Arts_Literature"},
+  {id:142,name:"tgpsc_g1_pre_Social_Exclusion_Rights_Issues_and_Policies"},
+  {id:143,name:"tgpsc_g1_pre_Logical_Reasoning_Analytical_Ability_Data_Interpretation"},
+  {id:144,name:"tgpsc_g2p1_Current_Affairs_Regional_National_International"},
+  {id:145,name:"tgpsc_g2p1_International_Relations_and_Events"},
+  {id:146,name:"tgpsc_g2p1_General_Science_and_Tech_Achievements"},
+  {id:147,name:"tgpsc_g2p1_Environmental_Issues_and_Disaster_Management"},
+  {id:148,name:"tgpsc_g2p1_World_Geography_Indian_Geography_Telangana_Geography"},
+  {id:149,name:"tgpsc_g2p1_History_and_Cultural_Heritage_of_India"},
+  {id:150,name:"tgpsc_g2p1_Telangana_Society_Culture_Heritage_Arts_Literature"},
+  {id:151,name:"tgpsc_g2p1_Policies_of_Telangana_State"},
+  {id:152,name:"tgpsc_g2p1_Social_Exclusion_Rights_Issues_and_Policies"},
+  {id:153,name:"tgpsc_g2p1_Logical_Reasoning_Analytical_Ability_Data_Interpretation"},
+  {id:154,name:"tgpsc_g2p1_Basic_English_10th_Class_Standard"},
+  {id:155,name:"tgpsc_g2p2_Socio_Cultural_History_of_India_and_Telangana"},
+  {id:156,name:"tgpsc_g2p2_Overview_of_Indian_Constitution_and_Politics"},
+  {id:157,name:"tgpsc_g2p2_Social_Structure_Issues_and_Public_Policies"},
+  {id:158,name:"tgpsc_g2p3_Indian_Economy_Issues_and_Challenges"},
+  {id:159,name:"tgpsc_g2p3_Economy_and_Development_of_Telangana"},
+  {id:160,name:"tgpsc_g2p3_Issues_of_Development_and_Change"},
+  {id:161,name:"tgpsc_g2p4_The_Idea_of_Telangana_1948_to_1970"},
+  {id:162,name:"tgpsc_g2p4_Mobilisational_Phase_1971_to_1990"},
+  {id:163,name:"tgpsc_g2p4_Towards_Formation_of_Telangana_State_1991_to_2014"},
+  {id:164,name:"tgpsc_g3p1_Current_Affairs_Regional_National_International"},
+  {id:165,name:"tgpsc_g3p1_International_Relations_and_Events"},
+  {id:166,name:"tgpsc_g3p1_General_Science_and_Tech_Achievements"},
+  {id:167,name:"tgpsc_g3p1_Environmental_Issues_and_Disaster_Management"},
+  {id:168,name:"tgpsc_g3p1_World_Geography_Indian_Geography_Telangana_Geography"},
+  {id:169,name:"tgpsc_g3p1_History_and_Cultural_Heritage_of_India"},
+  {id:170,name:"tgpsc_g3p1_Telangana_Society_Culture_Heritage_Arts_Literature"},
+  {id:171,name:"tgpsc_g3p1_Policies_of_Telangana_State"},
+  {id:172,name:"tgpsc_g3p1_Social_Exclusion_Rights_Issues_and_Policies"},
+  {id:173,name:"tgpsc_g3p1_Logical_Reasoning_Analytical_Ability_Data_Interpretation"},
+  {id:174,name:"tgpsc_g3p2_Socio_Cultural_History_of_Telangana_and_Formation_of_Telangana_State"},
+  {id:175,name:"tgpsc_g3p2_Overview_of_Indian_Constitution_and_Politics"},
+  {id:176,name:"tgpsc_g3p2_Social_Structure_Issues_and_Public_Policies"},
+  {id:177,name:"tgpsc_g3p3_Indian_Economy_Issues_and_Challenges"},
+  {id:178,name:"tgpsc_g3p3_Economy_and_Development_of_Telangana"},
+  {id:179,name:"tgpsc_g3p3_Issues_of_Development_and_Change"},
+  {id:180,name:"tgpsc_g4p1_Current_Affairs"},
+  {id:181,name:"tgpsc_g4p1_International_Relations_and_Events"},
+  {id:182,name:"tgpsc_g4p1_General_Science_in_Everyday_Life"},
+  {id:183,name:"tgpsc_g4p1_Environmental_Issues_and_Disaster_Management"},
+  {id:184,name:"tgpsc_g4p1_Geography_and_Economy_of_India_and_Telangana"},
+  {id:185,name:"tgpsc_g4p1_Indian_Constitution_Salient_Features"},
+  {id:186,name:"tgpsc_g4p1_Indian_Political_System_and_Government"},
+  {id:187,name:"tgpsc_g4p1_Modern_Indian_History_and_National_Movement"},
+  {id:188,name:"tgpsc_g4p1_History_of_Telangana_and_Telangana_Movement"},
+  {id:189,name:"tgpsc_g4p1_Society_Culture_Heritage_Arts_and_Literature_of_Telangana"},
+  {id:190,name:"tgpsc_g4p1_Policies_of_Telangana_State"},
+  {id:191,name:"tgpsc_g4p2_Mental_Ability_Verbal_and_Non_Verbal"},
+  {id:192,name:"tgpsc_g4p2_Logical_Reasoning"},
+  {id:193,name:"tgpsc_g4p2_Comprehension"},
+  {id:194,name:"tgpsc_g4p2_Rearrangement_of_Sentences"},
+  {id:195,name:"tgpsc_g4p2_Numerical_and_Arithmetical_Abilities"},
+  {id:196,name:"appsc_g1_pre_p1_History_and_Culture_of_India"},
+  {id:197,name:"appsc_g1_pre_p1_History_and_Culture_of_Andhra_Pradesh"},
+  {id:198,name:"appsc_g1_pre_p1_Indian_Constitution_and_Polity"},
+  {id:199,name:"appsc_g1_pre_p1_Social_Justice_and_Rights_Issues"},
+  {id:200,name:"appsc_g1_pre_p1_International_Relations_and_Foreign_Policy"},
+  {id:201,name:"appsc_g1_pre_p1_Indian_Economy_and_Planning"},
+  {id:202,name:"appsc_g1_pre_p1_Economy_of_Andhra_Pradesh"},
+  {id:203,name:"appsc_g1_pre_p1_General_Geography_and_Physical_Geography"},
+  {id:204,name:"appsc_g1_pre_p1_Geography_of_India_and_Andhra_Pradesh"},
+  {id:205,name:"appsc_g1_pre_p2_General_Mental_and_Psychological_Abilities"},
+  {id:206,name:"appsc_g1_pre_p2_Science_and_Technology_Information_Technology"},
+  {id:207,name:"appsc_g1_pre_p2_Current_Events_Regional_National_International"},
+  {id:208,name:"appsc_g2_pre_Indian_History_Ancient_Medieval_Modern"},
+  {id:209,name:"appsc_g2_pre_Geography_India_and_Andhra_Pradesh"},
+  {id:210,name:"appsc_g2_pre_Indian_Society_Structure_Issues_Welfare"},
+  {id:211,name:"appsc_g2_pre_Current_Affairs"},
+  {id:212,name:"appsc_g2_pre_Mental_Ability"},
+  {id:213,name:"appsc_g2_mains_p1_Social_and_Cultural_History_of_Andhra_Pradesh"},
+  {id:214,name:"appsc_g2_mains_p1_Indian_Constitution"},
+  {id:215,name:"appsc_g2_mains_p2_Indian_and_AP_Economy_Planning"},
+  {id:216,name:"appsc_g2_mains_p2_Science_and_Technology"},
+  {id:217,name:"appsc_g3_p1_General_Studies_and_Mental_Ability"},
+  {id:218,name:"appsc_g3_p2_Rural_Development_Schemes_and_History"},
+  {id:219,name:"appsc_g3_p2_Rural_Economy_of_Andhra_Pradesh"},
+  {id:220,name:"appsc_g3_p2_Panchayat_Raj_System_Evolution_and_Laws"},
+  {id:221,name:"appsc_g3_p2_Roles_and_Responsibilities_of_Panchayat_Secretary"},
+  {id:222,name:"appsc_g4_p1_General_Studies_and_Mental_Ability"},
+  {id:223,name:"appsc_g4_p2_General_English_Comprehension_and_Grammar"},
+  {id:224,name:"appsc_g4_p2_General_Telugu_Comprehension_and_Grammar"}
+];
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generate() {
+  const count = parseInt(document.getElementById("count").value);
+  if (!count || count <= 0) {
+    alert("Enter a valid number");
+    return;
+  }
+
+  const data = [];
+
+  for (let i = 1; i <= count; i++) {
+    const subject = subjects[rand(0, subjects.length - 1)];
+    data.push({
+      subject_id: subject.id,
+      subject_name: subject.name,
+      question_text: `Dummy question ${i}: What is the correct answer?`,
+      options: JSON.stringify({
+        A: "Dummy Option A",
+        B: "Dummy Option B",
+        C: "Dummy Option C",
+        D: "Dummy Option D"
+      }),
+      correct_answer: ["A","B","C","D"][rand(0,3)],
+      difficulty: rand(35,95),
+      is_published: i <= count / 2 ? 0 : rand(1990,2025),
+      explanation: `This is a dummy explanation for question ${i}.`
+    });
+  }
+
+  document.getElementById("output").value = JSON.stringify(data, null, 2);
+}
+
+function copyJSON() {
+  const t = document.getElementById("output");
+  t.select();
+  document.execCommand("copy");
+  alert("JSON copied to clipboard!");
+}
+</script>
+
+</body>
+</html>
