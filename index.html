@@ -28,6 +28,24 @@
   button:hover {
     background: #1d4ed8;
   }
+  .status {
+    margin-left: 12px;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #93c5fd;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
   .output-container {
     position: relative;
     margin-top: 20px;
@@ -60,6 +78,8 @@
 
 <input type="number" id="count" placeholder="Number of questions" min="1">
 <button onclick="generate()">Generate</button>
+
+<span id="status" class="status"></span>
 
 <div class="output-container">
   <button class="copy-btn" onclick="copyJSON()">📋 Copy</button>
@@ -198,6 +218,8 @@ function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+let timerInterval;
+
 function generate() {
   const count = parseInt(document.getElementById("count").value);
   if (!count || count <= 0) {
@@ -205,28 +227,41 @@ function generate() {
     return;
   }
 
-  const data = [];
+  const status = document.getElementById("status");
+  const start = performance.now();
+  status.innerHTML = `<div class="spinner"></div> Processing… 0.00s`;
 
-  for (let i = 1; i <= count; i++) {
-    const subject = subjects[rand(0, subjects.length - 1)];
-    data.push({
-      subject_id: subject.id,
-      subject_name: subject.name,
-      question_text: `Dummy question ${i}: What is the correct answer?`,
-      options: JSON.stringify({
-        A: "Dummy Option A",
-        B: "Dummy Option B",
-        C: "Dummy Option C",
-        D: "Dummy Option D"
-      }),
-      correct_answer: ["A","B","C","D"][rand(0,3)],
-      difficulty: rand(35,95),
-      is_published: i <= count / 2 ? 0 : rand(1990,2025),
-      explanation: `This is a dummy explanation for question ${i}.`
-    });
-  }
+  timerInterval = setInterval(() => {
+    const elapsed = ((performance.now() - start) / 1000).toFixed(2);
+    status.innerHTML = `<div class="spinner"></div> Processing… ${elapsed}s`;
+  }, 50);
 
-  document.getElementById("output").value = JSON.stringify(data, null, 2);
+  setTimeout(() => {
+    const data = [];
+    for (let i = 1; i <= count; i++) {
+      const subject = subjects[rand(0, subjects.length - 1)];
+      data.push({
+        subject_id: subject.id,
+        subject_name: subject.name,
+        question_text: `Dummy question ${i}: What is the correct answer?`,
+        options: JSON.stringify({
+          A: "Dummy Option A",
+          B: "Dummy Option B",
+          C: "Dummy Option C",
+          D: "Dummy Option D"
+        }),
+        correct_answer: ["A","B","C","D"][rand(0,3)],
+        difficulty: rand(35,95),
+        is_published: i <= count / 2 ? 0 : rand(1990,2025),
+        explanation: `This is a dummy explanation for question ${i}.`
+      });
+    }
+
+    clearInterval(timerInterval);
+    const total = ((performance.now() - start) / 1000).toFixed(2);
+    status.textContent = `Finished in ${total} seconds — thank you, copy now`;
+    document.getElementById("output").value = JSON.stringify(data, null, 2);
+  }, 10);
 }
 
 function copyJSON() {
