@@ -10,9 +10,7 @@
     color: #e5e7eb;
     padding: 20px;
   }
-  h1 {
-    margin-bottom: 12px;
-  }
+  h1 { margin-bottom: 12px; }
   input, button {
     padding: 10px;
     font-size: 16px;
@@ -25,9 +23,7 @@
     color: white;
     margin-left: 10px;
   }
-  button:hover {
-    background: #1d4ed8;
-  }
+  button:hover { background: #1d4ed8; }
   .status {
     margin-left: 12px;
     font-size: 14px;
@@ -43,9 +39,7 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
+  @keyframes spin { to { transform: rotate(360deg); } }
   .output-container {
     position: relative;
     margin-top: 20px;
@@ -67,18 +61,15 @@
     right: 10px;
     background: #16a34a;
   }
-  .copy-btn:hover {
-    background: #15803d;
-  }
+  .copy-btn:hover { background: #15803d; }
 </style>
 </head>
 <body>
 
-<h1>MCQ JSON Generator (125 Subjects)</h1>
+<h1>MCQ JSON Generator (All Subjects)</h1>
 
 <input type="number" id="count" placeholder="Number of questions" min="1">
 <button onclick="generate()">Generate</button>
-
 <span id="status" class="status"></span>
 
 <div class="output-container">
@@ -87,6 +78,7 @@
 </div>
 
 <script>
+/* === SUBJECT LIST (UNCHANGED, EXACTLY YOUR DATA) === */
 const subjects = [
   {id:8,name:"upsc_Ancient_Indian_History"},
   {id:9,name:"upsc_Medieval_Indian_History"},
@@ -218,6 +210,10 @@ function rand(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function random9Digit() {
+  return Math.floor(100000000 + Math.random() * 900000000);
+}
+
 let timerInterval;
 
 function generate() {
@@ -238,12 +234,17 @@ function generate() {
 
   setTimeout(() => {
     const data = [];
-    for (let i = 1; i <= count; i++) {
+    const base = random9Digit();
+    const now = new Date().toISOString();
+
+    for (let i = 0; i < count; i++) {
+      const qNum = base + i;
       const subject = subjects[rand(0, subjects.length - 1)];
+
       data.push({
         subject_id: subject.id,
         subject_name: subject.name,
-        question_text: `Dummy question ${i}: What is the correct answer?`,
+        question_text: `Question ${qNum}: What is the correct answer?`,
         options: JSON.stringify({
           A: "Dummy Option A",
           B: "Dummy Option B",
@@ -251,15 +252,17 @@ function generate() {
           D: "Dummy Option D"
         }),
         correct_answer: ["A","B","C","D"][rand(0,3)],
+        question_type: "MCQ",
+        created_at: now,
+        updated_at: now,
         difficulty: rand(35,95),
-        is_published: i <= count / 2 ? 0 : rand(1990,2025),
-        explanation: `This is a dummy explanation for question ${i}.`
+        is_published: 0,
+        explanation: `This is a dummy explanation for question ${qNum}.`
       });
     }
 
     clearInterval(timerInterval);
-    const total = ((performance.now() - start) / 1000).toFixed(2);
-    status.textContent = `Finished in ${total} seconds — thank you, copy now`;
+    status.textContent = `Finished in ${((performance.now()-start)/1000).toFixed(2)}s`;
     document.getElementById("output").value = JSON.stringify(data, null, 2);
   }, 10);
 }
